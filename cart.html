@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section id="header">
+        <a href="#"><img src="logo.png" width="140px" height="70px" style="margin-right:480px;"></a>
+        <div>
+            <ul id="navbar">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="shop.html">SHOP</a></li>
+                <li><a href="about.html">ABOUT</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a class="active" href="cart.html"><i class="fas fa-shopping-cart"></i></a></li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="cart" class="section-p1">
+        <table width="100%">
+            <thead>
+                <tr>
+                    <td>Remove</td>
+                    <td>Product</td>
+                    <td>Price</td>
+                    <td>Quantity</td>
+                    <td>Subtotal</td>
+                </tr>
+            </thead>
+            <tbody id="cart-items">
+            </tbody>
+        </table>
+    </section>
+
+    <section id="cart-add" class="section-p1">
+        <div id="subtotal">
+            <h3>Cart Total</h3>
+            <p id="total-price">Total Price: ₹0.00</p>
+        </div>
+    </section>
+
+    <script>
+        window.onload = displayCart;
+
+        // Add to cart function
+        function addToCart() {
+            let productName = document.querySelector(".single-pro-details h4").innerText;
+            let price = parseFloat(document.querySelector(".single-pro-details h2").innerText.replace('₹', ''));
+            let quantity = parseInt(document.querySelector("input[type='number']").value);
+            
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let existingProduct = cart.find(item => item.name === productName);
+            
+            if (existingProduct) {
+                existingProduct.quantity += quantity;
+            } else {
+                let product = { name: productName, price: price, quantity: quantity };
+                cart.push(product);
+            }
+            
+            localStorage.setItem("cart", JSON.stringify(cart));
+            window.location.href = "cart.html"; // Redirect to cart page
+        }
+
+        // Display the cart items
+        function displayCart() {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let cartContainer = document.getElementById("cart-items");
+            let totalPrice = 0;
+            cartContainer.innerHTML = "";
+
+            cart.forEach((item, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><button onclick="removeFromCart(${index})">X</button></td>
+                    <td>${item.name}</td>
+                    <td>₹${item.price.toFixed(2)}</td>
+                    <td>
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)">
+                    </td>
+                    <td id="subtotal-${index}">₹${(item.price * item.quantity).toFixed(2)}</td>
+                `;
+                cartContainer.appendChild(row);
+                totalPrice += item.price * item.quantity;
+            });
+            document.getElementById("total-price").innerText = `Total Price: ₹${totalPrice.toFixed(2)}`;
+        }
+        function updateQuantity(index, newQuantity) {
+            let cart = JSON.parse(localStorage.getItem("cart"));
+            cart[index].quantity = parseInt(newQuantity);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            displayCart();
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem("cart"));
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            displayCart();
+        }
+        </script>
+    
+</body>
+</html>
